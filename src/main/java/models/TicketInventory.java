@@ -17,8 +17,9 @@ public class TicketInventory {
 		return eventName;
 	}
 
-	// loop to search an array of seats
+	// loop to search database for available tickets
 	// remove seat if purchased
-	// deny seat if it is not found
+	// purchased seats go into separate table
+	
 	
 }	
