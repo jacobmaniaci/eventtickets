@@ -1,10 +1,14 @@
 package userinterface;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Scanner;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 
+import com.techelevator.Site;
+
+import administration.EventCreate;
 import models.ClubSeating;
 import models.FirstClassSeating;
 import models.GeneralAdmissionSeating;
@@ -30,7 +34,7 @@ public class UserInterface {
 	private static final String[] CHOOSE_ROW_FIRST_CLASS = { "A", "B", "C", "Back" };
 	private static final String[] CHOOSE_ROW_MID_VENUE = { "A", "B", "C", "D", "E", "Back" };
 	private JDBCEventDAO eventDAO;
-	// testing github pushes
+	
 	// constructor
 	public UserInterface(Menu menu) {
 		this.menu = menu;
@@ -147,59 +151,20 @@ public class UserInterface {
 	// this will make the UX a lot more seamless and friendly
 	public void chooseSeat(String chooseSectionPass, String chooseR, String eventPassPass) {
 		String chooseSt = "";
-		String chooseSectionPassPass = chooseSectionPass;
-		String chooseRow = chooseR;
-		String eventPass = eventPassPass;
+				
+		List<EventCreate> chooseSeat = eventDAO.showSeatingOptions(chooseSectionPass, chooseR, eventPassPass);
 		
-		String[] chooseSeat = eventDAO.showSeatingOptions(chooseSectionPass, chooseR, eventPassPass);
+		System.out.printf("\n %-40s %-15s \t%-15s \t%-15s \t%-15s \n", "Event Name", "Section", "Row", "SeatNumber", "Price");
+		for (EventCreate ticket : chooseSeat) {
+			System.out.printf("\n%-40s %-15s \t%-15s \t%-15s \t%-15s", ticket.getEventName(),
+					ticket.getSection(), ticket.getRow(), ticket.getSeatNumber(), "$" + ticket.getPrice());
+		}
 		
-		if (chooseSectionPass.equals("Club") || chooseSectionPass.equals("First Class") || chooseSectionPass.equals("Mid Venue")) {
-			chooseSt = (String) menu.getChoiceFromOptions(chooseSeat);
-			System.out.println("Your seat number is " + chooseSt);
-			createTicket(chooseSectionPassPass, chooseRow, chooseSt, eventPass);
-		} else if (chooseSectionPass.equals("General Admission")) {
-			chooseSt = "0";
-			System.out.println("Seats are first come serve in General Admission.");
-			createTicket(chooseSectionPassPass, chooseRow, chooseSt, eventPass);
-		} else {
-			System.out.println("Invalid Selection.");
-		}
-		displayMainMenuOptions();
-	}
-
-	
-	// create ticket object based on selection
-	private void createTicket(String chooseSectionPassPass, String chooseRow, String chooseSt, String eventPass) {
-		System.out.println("\n\n\n");
-		System.out.println("Your ticket for \'" + eventPass + "\' is: ");
-		int makeSeatInt = Integer.parseInt(chooseSt);
-		if (chooseSectionPassPass.equals("Club")) {
-			Seating userClubTicket = new ClubSeating(chooseSectionPassPass, chooseRow, makeSeatInt, new BigDecimal(300.00));
-			System.out.println(userClubTicket.toString());
-			System.out.println("Your price for this ticket is: $" + userClubTicket.getPrice());
-		}
-		if (chooseSectionPassPass.equals("First Class")) {
-			Seating userFirstClassTicket = new FirstClassSeating(chooseSectionPassPass, chooseRow, makeSeatInt, new BigDecimal(200.00));
-			System.out.println(userFirstClassTicket.toString());
-			System.out.println("Your price for this ticket is: $" + userFirstClassTicket.getPrice());
-		}
-		if (chooseSectionPassPass.equals("Mid Venue")) {
-			Seating userMidVenueTicket = new MidVenueSeating(chooseSectionPassPass, chooseRow, makeSeatInt, new BigDecimal(100.00));
-			System.out.println(userMidVenueTicket.toString());
-			System.out.println("Your price for this ticket is: $" + userMidVenueTicket.getPrice());
-		}
-		if (chooseSectionPassPass.equals("General Admission")) {
-			Seating userGeneralAdmissionTicket = new GeneralAdmissionSeating(chooseSectionPassPass, chooseRow, makeSeatInt, new BigDecimal(50.00));
-			System.out.println(userGeneralAdmissionTicket.toString());
-			System.out.println("Your price for this ticket is: $" + userGeneralAdmissionTicket.getPrice());
-		}
-		System.out.println("\n\n\n");
+		
 		
 	}
 
-	
-	
-	// check to see if seat is available
+
 
 	// check if user wants more tickets
 

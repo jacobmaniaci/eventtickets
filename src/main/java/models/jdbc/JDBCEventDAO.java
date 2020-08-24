@@ -9,12 +9,14 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
+import com.techelevator.Reservation;
+
 import administration.EventCreate;
 import administration.EventCreateDAO;
 
 public class JDBCEventDAO implements EventCreateDAO {
 
-private JdbcTemplate jdbcTemplate;
+	private JdbcTemplate jdbcTemplate;
 	
 	public JDBCEventDAO(DataSource dataSource) {
 		jdbcTemplate = new JdbcTemplate(dataSource);
@@ -122,38 +124,52 @@ private JdbcTemplate jdbcTemplate;
 	}
 	
 	@Override
-	public String[] showSeatingOptions(String section, String row, String event) {
+	public List<EventCreate> showSeatingOptions(String section, String row, String event) {
 		String makeEvent = "SELECT * FROM available_tickets " + 
 				 "WHERE event_name = ? AND section = ? AND row = ?";
 		SqlRowSet sql = jdbcTemplate.queryForRowSet(makeEvent, event, section, row);
 				
 		List<EventCreate> ticketAv = new ArrayList<>();
 		while(sql.next()) {
-			EventCreate ticket = new EventCreate();
-			
-			ticket.setTicketId(sql.getInt("ticket_id"));
-			ticket.setEventName(sql.getString("event_name"));
-			ticket.setSection(sql.getString("section"));
-			ticket.setRow(sql.getString("row"));
-			ticket.setSeatNumber(sql.getInt("seat_number"));
-			ticket.setPrice(sql.getBigDecimal("price"));
+			EventCreate ticket = mapRowToTicket(sql);
 			
 			ticketAv.add(ticket);
 		}
 		
-		String[] newArray = new String[ticketAv.size() + 1];
-		for (int i = 0; i < ticketAv.size(); i++ ) {
-			newArray[i] = ticketAv.get(i).getEventName().toString() + " " + 
-					ticketAv.get(i).getSection().toString() + " " +
-					ticketAv.get(i).getRow().toString() + " " + 
-					ticketAv.get(i).getSeatNumber() + " " +
-					ticketAv.get(i).getPrice().toString();
-		}
-		
-		return newArray;
+
+		System.out.println("Seats available for these options: " + ticketAv.size());
+		return ticketAv;
 		
 	}
+
 	
+	public EventCreate purchaseTicket(String chooseSectionPass, String chooseR, String eventPassPass, String chooseSt) {
+		String removeTicket = "DELETE FROM available_tickets WHERE event_name = ? "
+				+ "AND section = ? "
+				+ "AND row = ? "
+				+ "AND seat_number = ?";
+				
+		String addTicket = "INSERT INTO purchased_tickets WHERE event_name = ? "
+				+ "AND section = ? "
+				+ "AND row = ? "
+				+ "AND seat_number = ?";
+				
+		
+		return null;
+	}
+	
+	private EventCreate mapRowToTicket(SqlRowSet results) {
+		EventCreate ticket = new EventCreate();
+		ticket.setTicketId(results.getInt("ticket_id"));
+		ticket.setEventName(results.getString("event_name"));
+		ticket.setSection(results.getString("section"));
+		ticket.setRow(results.getString("row"));
+		ticket.setSeatNumber(results.getInt("seat_number"));
+		ticket.setPrice(results.getBigDecimal("price"));
+		
+		return ticket;
+		
+	}
 	
 
 }
