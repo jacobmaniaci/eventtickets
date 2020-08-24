@@ -3,6 +3,8 @@ package userinterface;
 import java.math.BigDecimal;
 import java.util.Scanner;
 
+import org.apache.commons.dbcp2.BasicDataSource;
+
 import models.ClubSeating;
 import models.FirstClassSeating;
 import models.GeneralAdmissionSeating;
@@ -10,35 +12,46 @@ import models.Menu;
 import models.MidVenueSeating;
 import models.Seating;
 import models.TicketInventory;
+import models.jdbc.JDBCEventDAO;
 
 public class UserInterface {
 
 	private Menu menu;
 	TicketInventory ticketInv = new TicketInventory();
 
+	// find a way to replace these menus by creating tables in sql 
+	// to hold this information
 	private static final String MAIN_MENU_MAIN = "Go to events page";
-	private static final String MAIN_MENU_PURCHASE = "Go to purchasing page";
-	private static final String[] MAIN_MENU_OPTIONS = { MAIN_MENU_MAIN, MAIN_MENU_PURCHASE };
+	private static final String MAIN_MENU_ADMIN = "Go to Administration";
+	private static final String[] MAIN_MENU_OPTIONS = { MAIN_MENU_MAIN, MAIN_MENU_ADMIN };
 	private static final String[] CHOOSE_EVENT = { "Fight Night: Java vs C#", "Jamming With Javascript",
 			"TECH Talks: Journey Into Databases", "Back" };
 	private static final String[] CHOOSE_SECTION = { "Club", "First Class", "Mid Venue", "General Admission", "Back" };
 	private static final String[] CHOOSE_ROW_FIRST_CLASS = { "A", "B", "C", "Back" };
 	private static final String[] CHOOSE_ROW_MID_VENUE = { "A", "B", "C", "D", "E", "Back" };
-	private static final String[] CHOOSE_SEAT = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13",
-			"14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31","32",
-			"33", "34", "35", "36", "37", "38", "39", "40", "Back" };
-
+	private JDBCEventDAO eventDAO;
+	
+	// constructor
 	public UserInterface(Menu menu) {
 		this.menu = menu;
+		
+		BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setUrl("jdbc:postgresql://localhost:5432/tickets");
+		dataSource.setUsername("postgres");
+		dataSource.setPassword("postgres1");
+		
+		eventDAO = new JDBCEventDAO(dataSource);
 	}
 
+	// the run method initiates the menu from which the user will
+	// begin the process of purchasing tickets
 	private void run() {
 		while (true) {
 			String choice = (String) menu.getChoiceFromOptions(MAIN_MENU_OPTIONS);
 			if (choice.equals(MAIN_MENU_MAIN)) {
 				displayMainMenuOptions();
-			} else if (choice.equals(MAIN_MENU_PURCHASE)) {
-				processPurchaseMenuOptions();
+			} else if (choice.equals(MAIN_MENU_ADMIN)) {
+				processAdminMenuOptions();
 			} else if (choice.equals("Exit")) {
 
 				System.exit(0);
@@ -46,15 +59,23 @@ public class UserInterface {
 		}
 	}
 
-	private void processPurchaseMenuOptions() {
+	// the following method is yet to be done
+	private void processAdminMenuOptions() {
 
-		// user confirms purchase
-
-		// remove tickets from available inventory
-
-		// log the transaction
+		Scanner adminUser = new Scanner(System.in);
+		System.out.println("Press 1 to create an event. Press 2 to destroy an event. ");
+		String adminUserChoice = adminUser.nextLine();
+		if (adminUserChoice.equals("1")) {
+			System.out.println("What is the name of your event? ");
+			adminUserChoice = adminUser.nextLine();
+			eventDAO.createEvent(adminUserChoice);
+			
+		}
+	
 	}
 
+	// the following method will allow user to choose the event the want to attend
+	// or return to the main menu
 	private void displayMainMenuOptions() {
 
 		// user chooses event
@@ -69,7 +90,10 @@ public class UserInterface {
 		}
 	}
 
-	
+	// the following method will begin the process of choosing a seat
+	// edits to be made are accessing an sql table with available 
+	// seats according to the section that a user wants and the row
+	// the user wants
 	public void chooseSeat(String eventMenuOption) {
 		// user chooses section
 		String chooseSect = "";
@@ -117,14 +141,20 @@ public class UserInterface {
 	}
 
 	// user chooses seat number
-	
+	// need to link the method to an sql table so that it only displays
+	// available seating and take out the guess work that a certain seat
+	// is available
+	// this will make the UX a lot more seamless and friendly
 	public void chooseSeat(String chooseSectionPass, String chooseR, String eventPassPass) {
 		String chooseSt = "";
 		String chooseSectionPassPass = chooseSectionPass;
 		String chooseRow = chooseR;
 		String eventPass = eventPassPass;
+		
+		String[] chooseSeat = eventDAO.showSeatingOptions(chooseSectionPass, chooseR, eventPassPass);
+		
 		if (chooseSectionPass.equals("Club") || chooseSectionPass.equals("First Class") || chooseSectionPass.equals("Mid Venue")) {
-			chooseSt = (String) menu.getChoiceFromOptions(CHOOSE_SEAT);
+			chooseSt = (String) menu.getChoiceFromOptions(chooseSeat);
 			System.out.println("Your seat number is " + chooseSt);
 			createTicket(chooseSectionPassPass, chooseRow, chooseSt, eventPass);
 		} else if (chooseSectionPass.equals("General Admission")) {
@@ -175,6 +205,8 @@ public class UserInterface {
 
 	// user finishes selection
 
+	
+	// main method initiates the UI program
 	public static void main(String[] args) {
 		Menu menu = new Menu(System.in, System.out);
 		UserInterface ui = new UserInterface(menu);
