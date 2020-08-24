@@ -1,5 +1,7 @@
 package models;
 
+import java.util.List;
+
 public class TEArena implements Event {
 	
 	
@@ -32,6 +34,12 @@ public class TEArena implements Event {
 	public void printAllTickets() {
 		
 		
+	}
+
+	@Override
+	public List<Seating> displaySeating() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 
