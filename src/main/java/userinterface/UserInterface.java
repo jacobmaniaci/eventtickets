@@ -89,12 +89,13 @@ public class UserInterface {
 	private void displayMainMenuOptions() {
 
 		// user chooses event
+		System.out.println("\nWhich event would you like to attend? ");
 		String eventMenuOption = "";
 		String[] eventsOptions = eventDAO.getAllEvents();
 		while (!eventMenuOption.equals("Back")) {
 			eventMenuOption = (String) menu.getChoiceFromOptions(eventsOptions);
 			
-			System.out.println("Your going to " + eventMenuOption);
+			System.out.println("\nYour going to " + eventMenuOption);
 			
 			while(!eventMenuOption.equals("Back")) {
 				chooseSection(eventMenuOption);
@@ -109,6 +110,7 @@ public class UserInterface {
 	// seats according to the section that a user wants and the row
 	// the user wants
 	public void chooseSection(String eventMenuOption) {
+		System.out.println("Choose your seating section.");
 		// user chooses section
 		String chooseSect = "";
 		String eventPass = eventMenuOption;
@@ -126,6 +128,7 @@ public class UserInterface {
 	// user chooses row
 
 	public void chooseRow(String chooseSection, String eventPass) {
+		System.out.println("\nChoose your section row.");
 		String chooseR = "";
 		String chooseSectionPass = chooseSection;
 		String eventPassPass = eventPass;
@@ -150,7 +153,8 @@ public class UserInterface {
 	// is available
 	// this will make the UX a lot more seamless and friendly
 	public void chooseSeat(String chooseSectionPass, String chooseR, String eventPassPass) {
-
+		System.out.println("Enter the seat number you want to reserve.");
+		
 		List<EventCreate> chooseSeat = eventDAO.showSeatingOptions(chooseSectionPass, chooseR, eventPassPass);
 
 		System.out.printf("\n %-40s %-15s \t%-15s \t%-15s \t%-15s \n", "Event Name", "Section", "Row", "SeatNumber",

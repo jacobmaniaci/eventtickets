@@ -118,7 +118,7 @@ public class JDBCEventDAO implements EventCreateDAO {
 
 	@Override
 	public List<EventCreate> showSeatingOptions(String section, String row, String event) {
-		String makeEvent = "SELECT * FROM available_tickets " + "WHERE event_name = ? AND section = ? AND row = ?";
+		String makeEvent = "SELECT * FROM available_tickets " + "WHERE event_name = ? AND section = ? AND row = ? LIMIT 40";
 		SqlRowSet sql = jdbcTemplate.queryForRowSet(makeEvent, event, section, row);
 
 		List<EventCreate> ticketAv = new ArrayList<>();
